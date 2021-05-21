@@ -1,5 +1,6 @@
 const mysql = require ("mysql");
-const inquirer = require("inquirer")
+const inquirer = require("inquirer");
+const table = require("console.table");
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -44,10 +45,14 @@ if(data.choice === "View All Employees"){
 
 const viewEE = () => {
     console.log('Gathering employees...\n');
-    connection.query('SELECT * FROM employee', (err, res) => {
+    connection.query('SELECT *,role.title FROM employee INNER JOIN role ON employee.role_id=role.title', (err, res) => {
       if (err) throw err;
-      // Log all results of the SELECT statement
-      console.log(res);
+      console.table('id First Name  Last Name  Role        Department    Manager  ');
+      console.table('-- ----------  ---------  ----------  -----------   -------------')
+      for(let i=0; i<res.length; i++){
+          console.log(`${res[i].id}   ${res[i].first_name}       ${res[i].last_name}       ${res[i].role_id}      ${res[i].department_id}     ${res[i].manager_id}`)
+      }
+      
       
     });
   };
@@ -82,7 +87,7 @@ const viewEE = () => {
             first_name:data.first_name,
             last_name:data.last_name,
             role_id:data.role_id,
-            highest_bid:newItem.starting_bid
+            manager_id:data.manager_id
         },(err,res)=>{
             if(err) {
                 console.log(err);
