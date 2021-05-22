@@ -22,7 +22,9 @@ inquirer.prompt ([
         type:"list",
         name:"choice",
         message:"What would you like to do?",
-        choices:["View All Employees","View All Employees By Department","View All Employees By Manager","Add Employee","Remove Employee","Update Employee Role","Update Employee Manager"]
+        choices:["View All Employees",
+        // "View All Employees By Department","View All Employees By Manager",
+        "Add Employee","Remove Employee","Update Employee Role","Update Employee Manager"]
     }
 ]).then(data =>{
 if(data.choice === "View All Employees"){
@@ -45,27 +47,24 @@ if(data.choice === "View All Employees"){
 
 const viewEE = () => {
     console.log('Gathering employees...\n');
-    connection.query('SELECT *,role.title FROM employee INNER JOIN role ON employee.role_id=role.title', (err, res) => {
+    connection.query('SELECT employee.id,employee.first_name,employee.last_name,role.title,employee.manager_id FROM employee INNER JOIN role ON employee.role_id=role.id', (err, res) => {
+       
       if (err) throw err;
-      console.table('id First Name  Last Name  Role        Department    Manager  ');
-      console.table('-- ----------  ---------  ----------  -----------   -------------')
-      for(let i=0; i<res.length; i++){
-          console.log(`${res[i].id}   ${res[i].first_name}       ${res[i].last_name}       ${res[i].role_id}      ${res[i].department_id}     ${res[i].manager_id}`)
-      }
+      console.table(res)
       
       
     });
   };
 
-  const viewDpt=()=>{
-      console.log("Gathering employees by department...\n");
-      connection.query('SELECT')
-  }
+//   const viewDpt=()=>{
+//       console.log("Gathering employees by department...\n");
+//       connection.query('SELECT')
+//   }
 
-  const viewMgr=()=>{
-      console.log("Gathering employees by direct manager...\n");
-      connection.query('SELECT')
-  }
+//   const viewMgr=()=>{
+//       console.log("Gathering employees by direct manager...\n");
+//       connection.query('SELECT')
+//   }
 
   const addEE=()=>{
     inquirer.prompt([{
