@@ -24,7 +24,7 @@ inquirer.prompt ([
         message:"What would you like to do?",
         choices:["View All Employees",
         // "View All Employees By Department","View All Employees By Manager",
-        "Add Employee","Remove Employee","Update Employee Role","Update Employee Manager"]
+        "Add Employee","Remove Employee","Update Employee Role","Update Employee Manager","Exit"]
     }
 ]).then(data =>{
 if(data.choice === "View All Employees"){
@@ -41,7 +41,7 @@ if(data.choice === "View All Employees"){
     updateRole();
 }else if (data.choice === "Update Employee Manager"){
     updateMgr();
-}
+}else{connection.end();}
 })
 };
 
@@ -51,9 +51,10 @@ const viewEE = () => {
        
       if (err) throw err;
       console.table(res)
-      
+      askUserChoice();
       
     });
+    
   };
 
 //   const viewDpt=()=>{
