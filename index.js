@@ -29,6 +29,8 @@ inquirer.prompt ([
         "View All Employees By Department",
         "View All Employees By Role",
         "Add Employee",
+        "Add Department",
+        "Add Role",
         // "Remove Employee",
         "Update Employee Role",
         // "Update Employee Manager",
@@ -43,6 +45,10 @@ if(data.choice === "View All Employees"){
     viewRole();
 }else if (data.choice === "Add Employee"){
     addEE();
+}else if (data.choice === "Add Department"){
+    addDpt();
+}else if (data.choice === "Add Role"){
+    addRole();
 }
 // else if (data.choice === "Remove Employee"){
 //     removeEE();
@@ -95,8 +101,6 @@ const viewEE = () => {
 
   //Add Employee to database
   const addEE=()=>{
-   
-
     
     inquirer.prompt([{
         name:"first_name",
@@ -128,45 +132,109 @@ const viewEE = () => {
             if(err) {
                 console.log(err);
             } else {
-                console.log("New employee added successfully!!!");
+                console.log("New employee added successfully!");
                 askUserChoice();
             }
         })
     })
     }
 
+    //Add Department to database
+    addDpt=()=>{
+        inquirer.prompt([
+            {
+                name:"addDpt",
+                type:"input",
+                message:"Enter the name of the department you would like to add."
 
-// const removeEE=()=>{
-//     connection.query("SELECT * FROM employee",(err,employees)=>{
-//         const employeeNames=employees.map(employee=>`${employee.first_name} ${employee.last_name}`);
+            }
+        ]).then(data =>{
+            connection.query("INSERT INTO department SET ?",{
+                name:data.name
+            },(err,res)=>{
+                if(err) {
+                    console.log(err);
+                }else {
+                    console.log("New department added successfully!")
+                    askUserChoice();
+                }
+            })
+        })
+    }
 
-//         inquirer.prompt([
-//             {
-//                 name:"delete",
-//                 type:"list",
-//                 message:"Which employee would you like to remove?",
-//                 choices:[employeeNames]
-//             }
-//         ]).then(data =>{
-//             connection.query(
-//                 'DELETE FROM employee WHERE ?',
-//                 {
-//                   id: data.id,
-//                 },
-//                 (err, res) => {
-//                   if (err) throw err;
-//                   console.table(res);
-//                   console.log(`employee deleted from database successfully`);
+    //Add Role to database
+    addRole=()=>{
+        inquirer.prompt([
+            {
+                name:"addRole",
+                type:"input",
+                message:"Enter the name of the role you would like to add."
+
+            },{
+                name:"role_salary",
+                type:"input",
+                message:"Enter a salary for this role.",
+                validate: function (input) {
+                    if (typeof input !== 'number') {
+                        
+                        done('You need to provide a number');
+                        return;
+                      }
+                }
+            },{
+                name:"department",
+                type:"list",
+                message:"Choose which department this role will be part of.",
+                choices:[]
+
+        }]).then(data =>{
+            connection.query("INSERT INTO role SET ?",{
+                title:data.addRole,
+                salary:data.role_salary,
+                department_id:data.department
+            },(err,res)=>{
+                if(err) {
+                    console.log(err);
+                }else {
+                    console.log("New department added successfully!")
+                    askUserChoice();
+                }
+            })
+        })
+    }
+
+
+const removeEE=()=>{
+    connection.query("SELECT * FROM employee",(err,employees)=>{
+        const employeeNames=employees.map(employee=>`${employee.first_name} ${employee.last_name}`);
+
+        inquirer.prompt([
+            {
+                name:"delete",
+                type:"list",
+                message:"Which employee would you like to remove?",
+                choices:[employeeNames]
+            }
+        ]).then(data =>{
+            connection.query(
+                'DELETE FROM employee WHERE ?',
+                {
+                  id: data.id,
+                },
+                (err, res) => {
+                  if (err) throw err;
+                  console.table(res);
+                  console.log(`employee deleted from database successfully`);
                   
-//                   askUserChoice();
-//                 }
-//               );
-//         })
+                  askUserChoice();
+                }
+              );
+        })
 
-//        })
+       })
     
     
-//     }
+    }
     
   // Connect to the DB
 connection.connect((err) => {
