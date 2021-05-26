@@ -66,7 +66,7 @@ else{connection.end();}
 //View All data for all Employees
 const viewEE = () => {
     console.log('Gathering employees...\n');
-    connection.query('SELECT employee.id,employee.first_name,employee.last_name,role.title,role.salary,department.name, employee.manager_id FROM employee INNER JOIN role ON employee.role_id=role.id INNER JOIN department on department.id = role.department_id', (err, res) => {
+    connection.query('SELECT employee.id,employee.first_name,employee.last_name,role.title,role.salary,department.name, employee.manager_id FROM employee INNER JOIN role ON employee.role_id=role.id INNER JOIN department ON department.id = role.department_id', (err, res) => {
        
       if (err) throw err;
       console.table(res)
@@ -145,12 +145,14 @@ function managers(){
         choices:managers()
 
     }]).then(data=>{
+        var roleID = roles().indexOf(data.role_id) + 1
+      var managerID = managers().indexOf(data.manager_id) + 1
         
-        connection.query("SELECT employee.role_id, employee.manager_id, role.id FROM role INNER JOIN employee ON role.id=employee.role_id INSERT INTO employee SET ?",{
+        connection.query("INSERT INTO employee SET ?",{
             first_name:data.first_name,
             last_name:data.last_name,
-            role_id:data.role_id,
-            manager_id:data.manager_id
+            role_id:roleID,
+            manager_id:managerID
         },(err,res)=>{
             if(err) {
                 console.log(err);
@@ -192,7 +194,7 @@ function managers(){
             connection.query("Select * FROM department", function (err,res) {
                 if (err) throw err;
                 for (var i=0; i < res.length; i++) {
-                    roleNames.push(res[i].name);
+                    dptNames.push(res[i].name);
                 }
             })
             return dptNames=[];
@@ -208,13 +210,7 @@ function managers(){
                 name:"role_salary",
                 type:"input",
                 message:"Enter a salary for this role.",
-                validate: function (input) {
-                    if (typeof input !== 'number') {
-                        
-                        console.log('You need to provide a number');
-                        return;
-                      }
-                }
+             
             },{
                 name:"department",
                 type:"list",
@@ -222,15 +218,16 @@ function managers(){
                 choices:departments()
 
         }]).then(data =>{
-            connection.query("SELECT role.department_id,department.name FROM role INNER JOIN role ON department.name=role.department_id INSERT INTO role SET ?",{
+            
+            connection.query("INSERT INTO role SET ?",{
                 title:data.addRole,
                 salary:data.role_salary,
-                department_id:data.department_id
+                department_id:data.department
             },(err,res)=>{
                 if(err) {
                     console.log(err);
                 }else {
-                    console.log("New department added successfully!")
+                    console.log("New role added successfully!")
                     askUserChoice();
                 }
             })
@@ -241,10 +238,10 @@ function managers(){
 const removeEE=()=>{
    employeeNames=[]
    function employees(){
-   connection.query("SELECT * FROM employees", function(err,res){
+   connection.query("SELECT employee.first_name,employee.last_name, employee.id FROM employee", function(err,res){
        if (err) throw err
        for (var i=0; i<res.length; i++) {
-           employeeNames.push(`${res[i].first_name} ${res[i].last_name}`)
+           employeeNames.push(`${res[i].id} ${res[i].first_name} ${res[i].last_name}`)
        }
    })
    return employeeNames;
