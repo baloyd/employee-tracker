@@ -192,7 +192,7 @@ function managers(){
             connection.query("Select * FROM department", function (err,res) {
                 if (err) throw err;
                 for (var i=0; i < res.length; i++) {
-                    dptNames.push(res[i].name);
+                    dptNames.push({name:`${res[i].name}`,value:res[i].id});
                 }
             })
             return dptNames=[];
