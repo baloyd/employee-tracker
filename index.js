@@ -90,7 +90,7 @@ const viewEE = () => {
 
   //View Employees by Role
   const viewRole=()=>{
-      console.log("Gathering employees by direct manager...\n");
+      console.log("Gathering employees by title...\n");
       connection.query('SELECT employee.first_name, employee.last_name, role.title FROM employee INNER JOIN role ON employee.role_id=role.id', (err,res) =>{
 
         if (err) throw err;
@@ -145,6 +145,7 @@ function managers(){
         choices:managers()
 
     }]).then(data=>{
+        console.log("data:", data)
    
         connection.query("INSERT INTO employee SET ?",{
             first_name:data.first_name,
@@ -172,6 +173,7 @@ function managers(){
 
             }
         ]).then(data =>{
+            console.log("data:", data)
             connection.query("INSERT INTO department SET ?",{
                 name:data.addDpt
             },(err,res)=>{
@@ -216,6 +218,7 @@ function managers(){
                 choices:departments()
 
         }]).then(data =>{
+            console.log("data:", data)
             
             connection.query("INSERT INTO role SET ?",{
                 title:data.addRole,
@@ -239,9 +242,13 @@ function managers(){
         if (err) throw err
         for (var i=0; i<res.length; i++) {
             employeeNames.push({name:`${res[i].first_name} ${res[i].last_name}`,value:res[i].id})
+            
         }
+      
     })
+    
     return employeeNames=[];
+   
  }
 
 const removeEE=()=>{
@@ -249,12 +256,25 @@ const removeEE=()=>{
 
         inquirer.prompt([
             {
+                name:"confirm",
+                type:"confirm",
+                message:"Please confirm that you would like to remove an employee",
+               
+                validate(value){
+                    if( value === 'y'){
+                        return true;
+                    }else return askUserChoice();
+                    
+                }
+            },
+            {
                 name:"delete",
                 type:"list",
                 message:"Which employee would you like to remove?",
                 choices:employees()
             }
         ]).then(data =>{
+            console.log("data:", data)
             connection.query(
                 'DELETE FROM employee WHERE ?',
                 {
@@ -273,8 +293,20 @@ const removeEE=()=>{
        }
     //Update employees role in the database
     const updateRole=()=>{
+      
+
         inquirer.prompt([
-            {
+            {  name:"confirm",
+            type:"confirm",
+            message:"Please confirm that you would like to remove an employee",
+           
+            validate(value){
+                if( value === true){
+                    return true;
+                }
+                return askUserChoice();
+            }
+        },{
                 name:"update",
                 type:'list',
                 message:"Which employee would you like to update?",
@@ -287,10 +319,11 @@ const removeEE=()=>{
             }
         ]).then(data=>{
             connection.query(
-                "INSERT INTO employee SET ? WHERE ?",{
-                    role_id:data.newRole,
-                    id:data.update
-                },
+                "UPDATE employee SET ? WHERE ?",
+                    [
+                        {role_id:data.newRole},
+                        {id:data.update}
+                    ],
                 (err,res) =>{
                     if (err) throw err;
                     console.table(res);
