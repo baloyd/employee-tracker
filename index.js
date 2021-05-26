@@ -232,18 +232,20 @@ function managers(){
         })
     }
 
+    //function to gather all employees into an array
+    employeeNames=[]
+    function employees(){
+    connection.query("SELECT employee.first_name,employee.last_name, employee.id FROM employee", function(err,res){
+        if (err) throw err
+        for (var i=0; i<res.length; i++) {
+            employeeNames.push({name:`${res[i].first_name} ${res[i].last_name}`,value:res[i].id})
+        }
+    })
+    return employeeNames=[];
+ }
 
 const removeEE=()=>{
-   employeeNames=[]
-   function employees(){
-   connection.query("SELECT employee.first_name,employee.last_name, employee.id FROM employee", function(err,res){
-       if (err) throw err
-       for (var i=0; i<res.length; i++) {
-           employeeNames.push(`${res[i].id} ${res[i].first_name} ${res[i].last_name}`)
-       }
-   })
-   return employeeNames;
-}
+
 
         inquirer.prompt([
             {
@@ -256,7 +258,7 @@ const removeEE=()=>{
             connection.query(
                 'DELETE FROM employee WHERE ?',
                 {
-                  id: data.id,
+                  id: data.delete,
                 },
                 (err, res) => {
                   if (err) throw err;
@@ -269,8 +271,37 @@ const removeEE=()=>{
         })
 
        }
-    
-    
+    //Update employees role in the database
+    const updateRole=()=>{
+        inquirer.prompt([
+            {
+                name:"update",
+                type:'list',
+                message:"Which employee would you like to update?",
+                choices:employees()
+            },{
+                name:"newRole",
+                type:"list",
+                message:"What is this employees new role?",
+                choices:roles()
+            }
+        ]).then(data=>{
+            connection.query(
+                "INSERT INTO employee SET ? WHERE ?",{
+                    role_id:data.newRole,
+                    id:data.update
+                },
+                (err,res) =>{
+                    if (err) throw err;
+                    console.table(res);
+                    console.log(`employee role updated successfully!`);
+
+                    askUserChoice();
+                }
+            )
+        })
+  
+    }
     
     
   // Connect to the DB
