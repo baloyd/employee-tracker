@@ -101,10 +101,10 @@ const viewEE = () => {
 //functions to push role and manager data into arrays to be called during inquirer choice
 roleNames=[]
 function roles(){
-    connection.query("SELECT * FROM role", function(err,res){
+    connection.query("SELECT role.title,employee.role_id FROM role INNER JOIN employee ON role.id= employee.role_id", function(err,res){
         if(err) throw err;
         for (var i=0; i < res.length; i++) {
-            roleNames.push(res[i].title)
+            roleNames.push({name: `${res[i].title}`, value: res[i].role_id })
         }
     })
     return roleNames=[];
@@ -112,10 +112,10 @@ function roles(){
 
 mgrNames=[]
 function managers(){
-    connection.query("SELECT employee.first_name,employee.last_name FROM employee WHERE manager_id IS NULL", function (err,res){
+    connection.query("SELECT employee.first_name,employee.last_name, employee.id FROM employee WHERE manager_id IS NULL", function (err,res){
         if(err) throw err;
         for (var i=0; i < res.length; i++) {
-            mgrNames.push(`${res[i].first_name} ${res[i].last_name}`)
+            mgrNames.push({name:`${res[i].first_name} ${res[i].last_name}`,value: res[i].id})
         }
     })
     return mgrNames=[];
@@ -145,14 +145,12 @@ function managers(){
         choices:managers()
 
     }]).then(data=>{
-        var roleID = roles().indexOf(data.role_id) + 1
-      var managerID = managers().indexOf(data.manager_id) + 1
-        
+   
         connection.query("INSERT INTO employee SET ?",{
             first_name:data.first_name,
             last_name:data.last_name,
-            role_id:roleID,
-            manager_id:managerID
+            role_id:data.role_id,
+            manager_id:data.manager_id
         },(err,res)=>{
             if(err) {
                 console.log(err);
