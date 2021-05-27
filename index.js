@@ -33,7 +33,7 @@ inquirer.prompt ([
         "Add Role",
         "Remove Employee",
         "Update Employee Role",
-        // "Update Employee Manager",
+        "Update Employee Manager",
         "Exit"]
     }
 ]).then(data =>{
@@ -56,9 +56,9 @@ else if (data.choice === "Remove Employee"){
 else if (data.choice === "Update Employee Role"){
     updateRole();
 }
-// else if (data.choice === "Update Employee Manager"){
-//     updateMgr();
-// }
+else if (data.choice === "Update Employee Manager"){
+    updateMgr();
+}
 else{connection.end();}
 })
 };
@@ -260,11 +260,11 @@ const removeEE=()=>{
                 type:"confirm",
                 message:"Please confirm that you would like to remove an employee",
                
-                validate(value){
-                    if( value === 'y'){
-                        return true;
-                    }else return askUserChoice();
-                    
+                validate: async (confirm) =>{
+                    if (confirm !== 'Yes'){
+                        return askUserChoice();
+                    }
+                    return true;
                 }
             },
             {
@@ -300,11 +300,11 @@ const removeEE=()=>{
             type:"confirm",
             message:"Please confirm that you would like to remove an employee",
            
-            validate(value){
-                if( value === true){
-                    return true;
+            validate: async (confirm) =>{
+                if (confirm !== 'Yes'){
+                    return askUserChoice();
                 }
-                return askUserChoice();
+                return true;
             }
         },{
                 name:"update",
@@ -326,9 +326,51 @@ const removeEE=()=>{
                     ],
                 (err,res) =>{
                     if (err) throw err;
-                    console.table(res);
                     console.log(`employee role updated successfully!`);
 
+                    askUserChoice();
+                }
+            )
+        })
+  
+    }
+    
+       //Update employees manager in the database
+       const updateMgr=()=>{
+
+        inquirer.prompt([
+            {  name:"confirm",
+            type:"confirm",
+            message:"Please confirm that you would like to change an employees direct manager",
+           
+            validate: async (confirm) =>{
+                if (confirm !== 'Yes'){
+                    return askUserChoice();
+                }
+                return true;
+            }
+        },{
+                name:"update",
+                type:'list',
+                message:"Which employee would you like to update?",
+                choices:employees()
+            },{
+                name:"newMgr",
+                type:"list",
+                message:"Who is this employees new manager?",
+                choices:managers()
+            }
+        ]).then(data=>{
+            connection.query(
+                "UPDATE employee SET ? WHERE ?",
+                    [
+                        {manager_id:data.newMgr},
+                        {id:data.update}
+                    ],
+                (err,res) =>{
+                    if (err) throw err;
+                    
+                    console.log(`employee manager updated successfully!`);
                     askUserChoice();
                 }
             )
